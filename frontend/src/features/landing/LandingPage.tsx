@@ -1,628 +1,643 @@
-/**
- * Landing Page - LMA Nexus
- * Award-winning minimalistic professional landing page
- * Clean, no purple, no gradients
- */
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ArrowTrendingUpIcon, 
+  DocumentTextIcon, 
+  ShieldCheckIcon, 
+  ChartBarIcon, 
+  ChevronRightIcon,
+  Bars3Icon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
 
-// Animated counter hook
-const useCounter = (end: number, duration: number = 2000) => {
-  const [count, setCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    if (!isVisible) return;
-    
-    let startTime: number;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      setCount(Math.floor(progress * end));
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    };
-    requestAnimationFrame(step);
-  }, [end, duration, isVisible]);
-
-  return { count, setIsVisible };
-};
-
-const LandingPage: React.FC = () => {
+export const LandingPage: React.FC = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  // Stats counters reflecting documented outcomes
-  const reviewSpeed = useCounter(60, 1800);
-  const issueReduction = useCounter(90, 2000);
-  const reconSpeed = useCounter(40, 1700);
-  const auditCoverage = useCounter(100, 2000);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-      
-      // Trigger counters when stats section is visible
-      const statsSection = document.getElementById('stats-section');
-      if (statsSection) {
-        const rect = statsSection.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.8) {
-          reviewSpeed.setIsVisible(true);
-          issueReduction.setIsVisible(true);
-          reconSpeed.setIsVisible(true);
-          auditCoverage.setIsVisible(true);
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleGetStarted = () => {
     navigate('/login');
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm' : 'bg-transparent'
-      }`}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+    <div className="min-h-screen text-[#111111] font-sans overflow-x-hidden selection:bg-emerald-100 relative bg-[#F9F8F3]">
+      {/* Background Artifacts */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <motion.div 
+          animate={{ 
+            x: [0, 40, 0],
+            y: [0, -30, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[-10%] left-[-10%] w-[80%] h-[80%] bg-emerald-200/40 blur-[130px] rounded-full" 
+        />
+        <motion.div 
+          animate={{ 
+            x: [0, -50, 0],
+            y: [0, 40, 0],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[-15%] right-[-15%] w-[70%] h-[70%] bg-blue-200/40 blur-[110px] rounded-full" 
+        />
+        <motion.div 
+          animate={{ 
+            x: [0, 30, 0],
+            y: [0, 50, 0],
+            scale: [1, 1.15, 1]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[5%] left-[10%] w-[60%] h-[60%] bg-purple-200/30 blur-[100px] rounded-full" 
+        />
+      </div>
+
+      {/* Navbar */}
+      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-6xl bg-white/80 backdrop-blur-3xl border border-white/60 rounded-[28px] shadow-[0_20px_70px_-15px_rgba(0,0,0,0.08)]">
+        <div className="px-8 mx-auto">
+          <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">L</span>
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center flex-shrink-0 gap-3 cursor-pointer group"
+            >
+              <div className="relative flex items-center justify-center">
+                {/* Animated Background Glow */}
+                <motion.div 
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    opacity: [0.3, 0.6, 0.3]
+                  }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-2xl blur-md"
+                />
+                <div className="relative flex items-center justify-center w-10 h-10 text-white transition-all duration-300 shadow-lg bg-gradient-to-br from-emerald-500 to-blue-600 rounded-2xl shadow-emerald-500/30 group-hover:shadow-emerald-500/50 group-hover:scale-105">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="white" fillOpacity="0.2"/>
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
               </div>
-              <span className="text-xl font-semibold text-slate-900 tracking-tight">
-                LMA Nexus
-              </span>
+              <div>
+                <span className="text-lg font-bold tracking-tight text-transparent bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text">LMA Nexus</span>
+                <div className="text-[9px] font-bold tracking-widest text-emerald-600 uppercase -mt-0.5">Loan Intelligence</div>
+              </div>
+            </motion.div>
+
+            {/* Desktop Links */}
+            <div className="items-center hidden space-x-10 md:flex">
+              {[{ name: 'Features', href: '#features' }, { name: 'Integrations', href: '#integrations' }, { name: 'Security', href: '#security' }, { name: 'About', href: '#about' }].map((item, index) => (
+                <motion.a
+                  key={item.name}
+                  href={item.href}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  className="text-[13px] font-bold transition-all text-slate-600 hover:text-slate-900 relative group/link"
+                >
+                  {item.name}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-blue-500 transition-all group-hover/link:w-full rounded-full" />
+                </motion.a>
+              ))}
             </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-10">
-              <a href="#features" className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">
-                Features
-              </a>
-              <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">
-                How it Works
-              </a>
-              <a href="#security" className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">
-                Security
-              </a>
-              <a href="#contact" className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">
-                Contact
-              </a>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="hidden md:flex items-center space-x-4">
-              <button 
-                onClick={handleGetStarted}
-                className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors"
+            {/* Login Link */}
+            <div className="hidden md:flex">
+              <motion.button
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                onClick={() => navigate('/login')}
+                className="px-6 py-2.5 text-[13px] font-bold text-slate-700 transition-all bg-transparent rounded-xl hover:bg-slate-100"
               >
                 Sign In
-              </button>
-              <button
-                onClick={handleGetStarted}
-                className="bg-slate-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors"
-              >
-                Get Started
-              </button>
+              </motion.button>
             </div>
 
             {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-slate-600 hover:text-slate-900"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
+            <div className="md:hidden">
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 text-slate-900"
+              >
+                {isMobileMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-slate-100">
-            <div className="px-6 py-4 space-y-4">
-              <a href="#features" className="block text-slate-600 hover:text-slate-900 text-sm font-medium">Features</a>
-              <a href="#how-it-works" className="block text-slate-600 hover:text-slate-900 text-sm font-medium">How it Works</a>
-              <a href="#security" className="block text-slate-600 hover:text-slate-900 text-sm font-medium">Security</a>
-              <a href="#contact" className="block text-slate-600 hover:text-slate-900 text-sm font-medium">Contact</a>
-              <button
-                onClick={handleGetStarted}
-                className="w-full bg-slate-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors"
-              >
-                Get Started
-              </button>
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="bg-white/95 backdrop-blur-xl border-t md:hidden border-slate-100 rounded-b-[28px]"
+            >
+              <div className="px-4 pt-2 pb-6 space-y-2">
+                {[{ name: 'Features', href: '#features' }, { name: 'Integrations', href: '#integrations' }, { name: 'Security', href: '#security' }].map((item) => (
+                  <a key={item.name} href={item.href} className="block px-3 py-2 text-base font-medium rounded-md text-slate-600 hover:bg-slate-50" onClick={() => setIsMobileMenuOpen(false)}>
+                    {item.name}
+                  </a>
+                ))}
+                <div className="pt-4 space-y-2">
+                  <button onClick={() => navigate('/login')} className="block w-full px-3 py-2 text-base font-medium text-left rounded-md text-slate-600 hover:bg-slate-50">
+                    Sign In
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 lg:pt-40 lg:pb-32">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-slate-100 text-slate-700 text-sm font-medium mb-8">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
-              Digital twin for syndicated loan agreements
+      <main className="relative pt-20 pb-16 overflow-hidden lg:pt-32 lg:pb-20">
+          
+        <div className="relative z-10 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          
+          {/* Background Gradient */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[800px] bg-gradient-to-b from-white to-transparent rounded-full blur-3xl -z-10 opacity-40" />
+
+          {/* Text Content */}
+          <div className="relative max-w-4xl mx-auto mb-8 text-center lg:mb-12">
+            {/* Floating Deco - Left */}
+            <div className="absolute top-0 hidden -left-24 xl:block">
+              <div className="grid grid-cols-2 gap-3">
+                {[1, 2, 3, 4].map(i => (
+                  <motion.div 
+                    key={`deco-l-${i}`}
+                    animate={{ y: [0, -10, 0], rotate: i % 2 === 0 ? [0, 5, 0] : [0, -5, 0] }}
+                    transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center border border-slate-200/50 ${i === 2 ? 'bg-[#00F0A0] shadow-lg shadow-[#00F0A0]/20' : 'bg-white shadow-sm'}`}
+                  >
+                    {i === 2 ? <div className="w-4 h-4 rotate-45 bg-white rounded-sm mix-blend-overlay"></div> : <div className="w-1.5 h-1.5 bg-slate-100 rounded-full"></div>}
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
-            {/* Headline */}
-            <h1 className="text-5xl lg:text-7xl font-bold text-slate-900 tracking-tight leading-[1.1] mb-6">
-              Turn 400-page PDFs into
-              <br />
-              structured, governable data.
-            </h1>
+            {/* Floating Deco - Right */}
+            <div className="absolute top-0 hidden -right-24 xl:block">
+              <div className="grid grid-cols-2 gap-3">
+                {[1, 2, 3, 4].map(i => (
+                  <motion.div 
+                    key={`deco-r-${i}`}
+                    animate={{ y: [0, 10, 0], rotate: i % 2 === 0 ? [0, -5, 0] : [0, 5, 0] }}
+                    transition={{ duration: 5 + i, repeat: Infinity, ease: "easeInOut" }}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center border border-slate-200/50 ${i === 3 ? 'bg-[#FFD200] shadow-lg shadow-[#FFD200]/20' : 'bg-white shadow-sm'}`}
+                  >
+                    {i === 3 ? <div className="w-4 h-4 rotate-45 bg-white rounded-sm mix-blend-overlay"></div> : <div className="w-1.5 h-1.5 bg-slate-100 rounded-full"></div>}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
 
-            {/* Subheadline */}
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed">
-              LMA Nexus builds a live dependency graph of every clause, detects commercial drift in real time,
-              and publishes golden-record exports for LoanIQ, Finastra, and downstream systems—without re-keying.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <motion.h1 
+              initial={{ opacity: 0.7, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-5xl md:text-[72px] font-bold tracking-tight text-[#111111] mb-6 leading-[1.05]"
+            >
+              One place for all <br />
+              <span className="text-[#111111]/90">
+                digital loan assets
+              </span>
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="max-w-2xl mx-auto mb-8 text-base font-medium leading-relaxed md:text-lg text-slate-500"
+            >
+              Transform static legal text into intelligent, structured digital twins. <br className="hidden md:block" />
+              Automate drift detection and ensure deal-wide consistency.
+            </motion.p>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="flex items-center justify-center gap-4"
+            >
               <button
                 onClick={handleGetStarted}
-                className="w-full sm:w-auto bg-slate-900 text-white px-8 py-4 rounded-xl text-base font-semibold hover:bg-slate-800 transition-all hover:shadow-lg hover:-translate-y-0.5"
+                className="px-8 py-3.5 text-base font-bold text-white transition-all bg-black shadow-2xl rounded-2xl hover:bg-emerald-600 hover:scale-105 active:scale-95 shadow-emerald-500/10"
               >
-                Get Started — It's Free
+                Launch Platform
               </button>
-              <button className="w-full sm:w-auto flex items-center justify-center gap-2 text-slate-700 px-8 py-4 rounded-xl text-base font-semibold hover:bg-slate-50 transition-colors border border-slate-200">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-                Watch Demo
+              <button className="px-8 py-3.5 text-base font-bold text-black border border-black/10 bg-white shadow-xl rounded-2xl hover:bg-slate-50 transition-all">
+                View Demo
               </button>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="mt-16 pt-10 border-t border-slate-100">
-              <p className="text-sm text-slate-500 mb-6">Powering documentation for leading institutions</p>
-              <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-50">
-                <span className="text-2xl font-bold text-slate-400 tracking-tight">Agent Banks</span>
-                <span className="text-2xl font-bold text-slate-400 tracking-tight">Legal Counsel</span>
-                <span className="text-2xl font-bold text-slate-400 tracking-tight">Risk Committees</span>
-                <span className="text-2xl font-bold text-slate-400 tracking-tight">Operations</span>
-                <span className="text-2xl font-bold text-slate-400 tracking-tight">Servicing Teams</span>
-              </div>
-            </div>
+            </motion.div>
           </div>
+
+          {/* Dashboard Preview */}
+          <motion.div 
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="relative max-w-[1240px] mx-auto mt-10 px-4"
+          >
+            {/*Main App Window */}
+            <div className="relative z-10 overflow-hidden bg-white border border-slate-200/80 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] rounded-[40px]">
+              
+              {/* Internal Dashboard Nav */}
+              <div className="flex items-center justify-between h-16 px-8 bg-white border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center w-5 h-5 text-white bg-black rounded-md">
+                        <ShieldCheckIcon className="w-3 h-3" />
+                    </div>
+                    <span className="text-sm font-bold tracking-tight">Project Horizon</span>
+                </div>
+                
+                <div className="flex items-center gap-1 bg-[#F5F5F5] p-1 rounded-2xl">
+                    {['Overview', 'Digital Twin', 'Impact Map', 'Audit'].map((item, idx) => (
+                        <div key={item} className={`px-4 py-1.5 rounded-xl text-[12px] font-bold cursor-pointer transition-all ${idx === 1 ? 'bg-white shadow-sm text-black' : 'text-slate-400 hover:text-slate-600'}`}>
+                            {item}
+                        </div>
+                    ))}
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 px-2 py-1 border rounded-lg bg-emerald-50 border-emerald-100">
+                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                        <span className="text-[10px] font-bold text-emerald-700">98% Deal Integrity</span>
+                    </div>
+                    <img src="https://i.pravatar.cc/150?u=ma" className="w-8 h-8 border rounded-full border-slate-200" alt="User" />
+                </div>
+              </div>
+
+              <div className="p-8 bg-white min-h-[500px]">
+                  <div className="grid grid-cols-12 gap-8">
+                    {/* Left Column: Data Twins */}
+                    <div className="col-span-12 lg:col-span-7">
+                        <div className="mb-6">
+                            <h2 className="mb-1 text-2xl font-bold tracking-tight text-slate-800">Covenant Structure</h2>
+                            <p className="text-[12px] text-slate-400 font-medium">Auto-extracted from LMA Section 21.2</p>
+                        </div>
+
+                        <div className="mb-8 space-y-3">
+                            {[
+                                { label: "Leverage Ratio", value: "3.50x", status: "Balanced", color: "emerald" },
+                                { label: "Interest Cover", value: "4.25x", status: "Safe", color: "blue" },
+                                { label: "EBITDA Margin", value: "22.4%", status: "At Risk", color: "orange" }
+                            ].map((item, i) => (
+                                <motion.div 
+                                    key={i}
+                                    initial={{ x: -20, opacity: 0 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.8 + (i * 0.1) }}
+                                    className="flex items-center justify-between p-4 transition-all border group bg-slate-50/50 border-slate-100/80 rounded-2xl hover:bg-white hover:shadow-lg"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-lg bg-${item.color}-50 flex items-center justify-center text-${item.color}-600`}>
+                                            <ChartBarIcon className="w-4 h-4" />
+                                        </div>
+                                        <span className="text-sm font-bold text-slate-600">{item.label}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-mono text-sm font-bold text-black">{item.value}</span>
+                                        <div className={`px-2 py-0.5 rounded-md bg-${item.color}-50 border border-${item.color}-100 text-[10px] font-bold text-${item.color}-600`}>
+                                            {item.status}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        {/* Impact Map Simulation */}
+                        <div className="relative flex items-center justify-center h-40 overflow-hidden border border-dashed bg-slate-50 rounded-2xl border-slate-200">
+                            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, #cbd5e1 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+                            <div className="relative z-10 flex items-center gap-12">
+                                <div className="flex items-center justify-center w-10 h-10 bg-white border rounded-lg shadow-sm border-slate-200 text-slate-400"><DocumentTextIcon className="w-5 h-5"/></div>
+                                <div className="relative">
+                                    <div className="w-24 h-0.5 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                                    <motion.div 
+                                        animate={{ x: [0, 96, 0] }}
+                                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                        className="absolute top-[-4px] left-0 w-2 h-2 bg-emerald-400 rounded-full"
+                                    />
+                                </div>
+                                <div className="w-10 h-10 bg-emerald-50 border border-emerald-200 shadow-sm rounded-lg flex items-center justify-center text-emerald-600 font-bold text-[10px]">94%</div>
+                            </div>
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Digital Dependency Graph</div>
+                        </div>
+                    </div>
+
+                    {/* Right Column: Drift Alerts */}
+                    <div className="col-span-12 lg:col-span-5">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-sm font-bold text-slate-800">Commercial Drift</h3>
+                            <div className="px-2 py-0.5 bg-red-50 text-[10px] font-bold text-red-600 rounded-md border border-red-100">4 Active</div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {[
+                                { name: "Margin Change", type: "Finanical", severity: "High", color: "red", desc: "2.5% → 2.75% Deviation" },
+                                { name: "EBITDA Definition", type: "Legal", severity: "Medium", color: "orange", desc: "Non-standard exclusion found" },
+                                { name: "Reporting Clause", type: "Operational", severity: "Low", color: "blue", desc: "30 day grace period" }
+                            ].map((drift, i) => (
+                                <motion.div 
+                                    key={i}
+                                    initial={{ x: 20, opacity: 0 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 1 + (i * 0.1) }}
+                                    className="p-4 transition-colors bg-white border cursor-pointer border-slate-100 rounded-2xl hover:bg-slate-50 group"
+                                >
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div>
+                                            <div className="text-[13px] font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{drift.name}</div>
+                                            <div className="text-[11px] text-slate-400 font-medium">{drift.type}</div>
+                                        </div>
+                                        <div className={`px-2 py-0.5 rounded-md bg-${drift.color}-50 border border-${drift.color}-100 text-[9px] font-bold text-${drift.color}-600 uppercase`}>
+                                            {drift.severity}
+                                        </div>
+                                    </div>
+                                    <div className="text-[11px] text-slate-600 bg-slate-100/50 p-2 rounded-lg font-medium">{drift.desc}</div>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        <div className="relative p-4 mt-8 overflow-hidden text-white bg-black/95 rounded-2xl">
+                            <div className="absolute top-[-20px] right-[-20px] w-20 h-20 bg-emerald-500/20 blur-2xl rounded-full" />
+                            <div className="relative z-10">
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-1">AI Recommendation</div>
+                                <div className="text-[12px] font-medium leading-relaxed">Map markup "Term SOFR" to "Base Rate" variable. <span className="font-bold text-emerald-300">94% Confidence.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            
+            {/* Soft Shadow Glows */}
+            <div className="absolute h-40 rounded-full -bottom-20 left-20 right-20 bg-black/5 blur-3xl -z-10"></div>
+          </motion.div>
         </div>
-      </section>
+      </main>
 
-      {/* Stats Section */}
-      <section id="stats-section" className="py-20 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-slate-900 mb-2">
-                {reviewSpeed.count}%
-              </div>
-              <div className="text-sm text-slate-600">Faster review cycles</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-slate-900 mb-2">
-                {issueReduction.count}%
-              </div>
-              <div className="text-sm text-slate-600">Fewer post-close issues</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-slate-900 mb-2">
-                {reconSpeed.count}%
-              </div>
-              <div className="text-sm text-slate-600">Faster external markup integration</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-slate-900 mb-2">
-                {auditCoverage.count}%
-              </div>
-              <div className="text-sm text-slate-600">Audit coverage on every action</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-24 lg:py-32">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          {/* Section Header */}
-          <div className="max-w-2xl mb-16">
-            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
-              Features
-            </p>
-            <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-6">
-              One platform for drafting, drift control, and golden records
-            </h2>
-            <p className="text-lg text-slate-600">
-              Directly mapped to the backend schema: clauses, variables, graph nodes, drift items, reconciliation sessions, and audit events—no translation layers.
-            </p>
+      {/* Integrations Section */}
+      <section id="integrations" className="relative py-24 overflow-hidden">
+        {/* Background Blobs */}
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-100/40 blur-[100px] rounded-full -z-10" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-emerald-100/30 blur-[80px] rounded-full -z-10" />
+        
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="mb-16 text-center">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mb-4 text-4xl md:text-5xl font-bold tracking-tight text-[#111111]"
+            >
+              Enterprise Ecosystem
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="max-w-2xl mx-auto text-lg font-medium text-slate-500"
+            >
+              LMA Nexus lives where your data does. Seamlessly connect with the tools your team already uses.
+            </motion.p>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all">
-              <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">Nexus-Sync Drafting</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Extract clauses, bind financial variables, and enforce governance rules in real time. Every edit flows into the dependency graph automatically.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all">
-              <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">Impact Map</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Visual dependency graph across definitions, covenants, and calculations. See ripple effects before approving baseline changes.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all">
-              <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">Commercial Drift Control</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Monitor deviations from approved terms with severity, approvals, and export gating so risky drafts never reach downstream systems.
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all">
-              <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">AI Reconciliation</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Ingest DOCX/PDF markups from external counsel. Confidence-scored suggestions map straight into structured variables with auditability.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all">
-              <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">Golden Record Export</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Machine-readable JSON mapped to Prisma-backed models. Pre-built connectors for LoanIQ, Finastra, Allvue, and covenant trackers.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all">
-              <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">Audit & Governance</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Immutable audit events with RBAC-aligned visibility. Governance rules block edits that bypass credit or legal policy.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 lg:py-32 bg-slate-900">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          {/* Section Header */}
-          <div className="text-center max-w-2xl mx-auto mb-20">
-            <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
-              How It Works
-            </p>
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-              From document to deal in three steps
-            </h2>
-          </div>
-
-          {/* Steps */}
-          <div className="grid lg:grid-cols-3 gap-12">
-            {/* Step 1 */}
-            <div className="text-center">
-              <div className="w-16 h-16 bg-white text-slate-900 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6">
-                1
-              </div>
-              <h3 className="text-2xl font-semibold text-white mb-4">Upload & Normalize</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Drop DOCX/PDF agreements. We extract clauses, bind variables, and map everything to the dependency graph without manual re-keying.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="text-center">
-              <div className="w-16 h-16 bg-white text-slate-900 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6">
-                2
-              </div>
-              <h3 className="text-2xl font-semibold text-white mb-4">Collaborate & Govern</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Legal, risk, and operations work from the same data model. Resolve drift, capture reasons, and route approvals before publishing.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="text-center">
-              <div className="w-16 h-16 bg-white text-slate-900 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6">
-                3
-              </div>
-              <h3 className="text-2xl font-semibold text-white mb-4">Publish Golden Record</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Export governed data to servicing platforms with integrity gates and audit events. No drift, no missing approvals, no surprises.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              { name: 'Document Management', desc: 'SharePoint, Box, Dropbox', icon: '📁' },
+              { name: 'Loan Systems', desc: 'LoanIQ, Fusion, Summit', icon: '🏦' },
+              { name: 'Data Warehouses', desc: 'Snowflake, Databricks', icon: '☁️' },
+              { name: 'APIs & Webhooks', desc: 'RESTful API access', icon: '⚡' }
+            ].map((integration, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="p-8 transition-all bg-white/60 backdrop-blur-xl border border-white/80 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.02)] hover:shadow-xl hover:bg-white/80"
+              >
+                <div className="mb-4 text-3xl">{integration.icon}</div>
+                <h3 className="mb-2 text-lg font-bold text-[#111111]">{integration.name}</h3>
+                <p className="text-sm font-medium text-slate-500">{integration.desc}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Security Section */}
-      <section id="security" className="py-24 lg:py-32">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Content */}
-            <div>
-              <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                Enterprise Security
-              </p>
-              <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-6">
-                Built for the most security-conscious institutions
-              </h2>
-              <p className="text-lg text-slate-600 mb-10">
-                We understand that loan documentation contains sensitive financial data. That's why security isn't an afterthought—it's foundational.
-              </p>
+      <section id="security" className="relative py-24 bg-[#F5F7F5] overflow-hidden rounded-[60px] mx-4 mb-24 lg:mx-8 border border-white">
+        {/* Lighter Background Artifacts */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-200/40 blur-[130px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-100/30 blur-[110px] rounded-full" />
 
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900 mb-1">SOC 2 Type II Certified</h4>
-                    <p className="text-slate-600">Independently audited security controls and processes.</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900 mb-1">End-to-End Encryption</h4>
-                    <p className="text-slate-600">AES-256 encryption at rest and TLS 1.3 in transit.</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900 mb-1">Role-Based Access Control</h4>
-                    <p className="text-slate-600">Granular permissions ensure users see only what they need.</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900 mb-1">99.99% Uptime SLA</h4>
-                    <p className="text-slate-600">Enterprise-grade infrastructure with global redundancy.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Visual */}
-            <div className="relative">
-              <div className="aspect-square bg-slate-100 rounded-3xl p-12 flex items-center justify-center">
-                <div className="w-full max-w-sm">
-                  {/* Shield Icon */}
-                  <div className="relative">
-                    <svg className="w-full h-auto text-slate-200" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    </svg>
-                    <svg className="w-1/2 h-auto text-slate-900 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="relative z-10 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="mb-16 text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 mb-6 border rounded-full border-emerald-200 bg-emerald-50"
+            >
+              <ShieldCheckIcon className="w-4 h-4 text-emerald-600" />
+              <span className="text-xs font-bold tracking-widest uppercase text-emerald-600">Bank-Grade Infrastructure</span>
+            </motion.div>
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mb-4 text-4xl md:text-5xl font-bold tracking-tight text-[#111111] leading-[1.1]"
+            >
+              Fortress for your <br />
+              legal assets
+            </motion.h2>
           </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { 
+                title: 'End-to-End Encryption', 
+                icon: ShieldCheckIcon, 
+                desc: 'AES-256 encryption at rest and TLS 1.3 in transit. Your documents are never exposed.',
+                badge: 'SOC 2 Type II'
+              },
+              { 
+                title: 'Role-Based Access', 
+                icon: ShieldCheckIcon, 
+                desc: 'Granular permissions at workspace, facility, and document levels with full SSO integration.',
+                badge: 'ISO 27001'
+              },
+              { 
+                title: 'Compliance & Audit', 
+                icon: DocumentTextIcon, 
+                desc: 'Complete audit logs for regulatory compliance. GDPR, SOX, and GLBA compliant storage.',
+                badge: 'GDPR Ready'
+              }
+            ].map((security, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="p-8 transition-all border border-white bg-white/80 backdrop-blur-sm rounded-3xl hover:shadow-xl hover:bg-white"
+              >
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex items-center justify-center w-12 h-12 text-emerald-600 bg-emerald-50 rounded-2xl">
+                    <security.icon className="w-6 h-6" />
+                  </div>
+                  <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-emerald-600 border border-emerald-100 rounded-full uppercase bg-emerald-50/50">
+                    {security.badge}
+                  </span>
+                </div>
+                <h3 className="mb-3 text-xl font-bold text-[#111111]">{security.title}</h3>
+                <p className="font-medium leading-relaxed text-slate-500">{security.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="p-10 mt-12 text-center border bg-white border-white rounded-[40px] shadow-sm"
+          >
+            <h3 className="mb-4 text-2xl font-bold text-[#111111]">Hosted on Trusted Infrastructure</h3>
+            <p className="max-w-3xl mx-auto text-lg font-medium text-slate-500">
+              LMA Nexus operates on AWS isolated environments with multi-region redundancy, real-time threat detection, and a 99.99% uptime guarantee for enterprise customers.
+            </p>
+          </motion.div>
         </div>
       </section>
 
-      {/* Testimonial Section */}
-      <section className="py-24 lg:py-32 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-          <svg className="w-12 h-12 text-slate-300 mx-auto mb-8" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-          </svg>
-          <blockquote className="text-2xl lg:text-3xl font-medium text-slate-900 leading-relaxed mb-8">
-            "LMA Nexus gave us a true digital twin of the facility agreement. External markups land in the graph in minutes, and export gating means downstream systems never see bad data."
-          </blockquote>
-          <div>
-            <div className="font-semibold text-slate-900">Sarah Chen</div>
-            <div className="text-slate-600">Head of Loan Operations, Global Banking Corp</div>
+      {/* About Section */}
+      <section id="about" className="relative py-24 overflow-hidden">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="grid items-center grid-cols-1 gap-20 lg:grid-cols-2">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="w-12 h-1 mb-8 bg-black rounded-full" />
+              <h2 className="mb-8 text-4xl md:text-5xl font-bold tracking-tight text-[#111111] leading-[1.05]">
+                By operations experts, <br />
+                for operations experts.
+              </h2>
+              <p className="mb-8 text-lg font-medium leading-relaxed text-slate-500">
+                Founded by veterans of the syndicated loan market, LMA Nexus was built to solve the systematic inefficiencies in document lifecycle management. 
+              </p>
+              <p className="mb-12 text-lg font-medium leading-relaxed text-slate-500">
+                We believe that legal agreements shouldn't be static PDFs—they should be intelligent, structured digital assets that power your entire deal portfolio.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-8">
+                {[
+                  { metric: '10M+', label: 'Clauses Analyzed' },
+                  { metric: '99.9%', label: 'Extraction Accuracy' },
+                  { metric: '12s', label: 'Average Processing' },
+                  { metric: '24/7', label: 'Continuous Audit' }
+                ].map((stat, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    <div className="text-3xl font-bold text-[#111111] mb-1">{stat.metric}</div>
+                    <div className="text-sm font-bold tracking-widest uppercase text-slate-400">{stat.label}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              {/* Decorative Background Elements */}
+              <div className="absolute top-[-20%] right-[-20%] w-[120%] h-[120%] bg-emerald-100/50 blur-[100px] rounded-full -z-10" />
+              
+              <div className="p-10 border-2 bg-white/80 backdrop-blur-xl border-white rounded-[48px] shadow-2xl shadow-emerald-900/5">
+                <h3 className="mb-8 text-2xl font-bold text-[#111111]">Why make the switch?</h3>
+                <div className="space-y-6">
+                  {[
+                    'Automate 90% of manual reconciliation work',
+                    'Catch commercial drifts in real-time',
+                    'Standardize your entire deal portfolio',
+                    'Regulatory-ready audit logs with provenance',
+                    'Seamless LMA and custom template support'
+                  ].map((benefit, i) => (
+                    <motion.div 
+                      key={i} 
+                      className="flex items-start gap-4"
+                      initial={{ opacity: 0, x: 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 * i }}
+                    >
+                      <div className="flex items-center justify-center flex-shrink-0 w-6 h-6 mt-1 text-white bg-[#111111] rounded-lg">
+                        <ChevronRightIcon className="w-4 h-4" />
+                      </div>
+                      <span className="text-lg font-semibold text-slate-700">{benefit}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section id="contact" className="py-24 lg:py-32">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="bg-slate-900 rounded-3xl p-12 lg:p-20 text-center">
-            <h2 className="text-3xl lg:text-5xl font-bold text-white mb-6">
-              Ready to ship golden-record loan docs with zero re-keying?
-            </h2>
-            <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-10">
-              Join teams replacing static PDFs with governed data models, drift control, and direct exports to servicing.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button
-                onClick={handleGetStarted}
-                className="w-full sm:w-auto bg-white text-slate-900 px-8 py-4 rounded-xl text-base font-semibold hover:bg-slate-100 transition-colors"
-              >
-                Get Started Free
-              </button>
-              <button className="w-full sm:w-auto text-white px-8 py-4 rounded-xl text-base font-semibold hover:bg-slate-800 transition-colors border border-slate-700">
-                Schedule a Demo
-              </button>
+      <section className="py-32">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="p-16 relative overflow-hidden bg-white border border-slate-100 rounded-[64px] text-center shadow-[0_32px_64px_-12px_rgba(0,0,0,0.04)]"
+          >
+            {/* CTA Background Decoration (Light) */}
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+              <div className="absolute top-[-50%] left-[-20%] w-[80%] h-[150%] bg-emerald-100/40 blur-[120px] rounded-full rotate-12" />
+              <div className="absolute bottom-[-50%] right-[-20%] w-[80%] h-[150%] bg-blue-50/30 blur-[120px] rounded-full -rotate-12" />
             </div>
-          </div>
+
+            <div className="relative z-10">
+              <h2 className="mb-6 text-4xl md:text-6xl font-bold tracking-tight text-[#111111] leading-[1.1]">
+                The future of loan <br />
+                operations is digital.
+              </h2>
+              <p className="max-w-2xl mx-auto mb-12 text-xl font-medium text-slate-500">
+                Join the financial institutions modernizing their workflows with LMA Nexus.
+              </p>
+              <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
+                <button
+                  onClick={handleGetStarted}
+                  className="w-full sm:w-auto px-10 py-5 text-lg font-bold text-white transition-all bg-[#111111] rounded-2xl hover:bg-emerald-600 hover:scale-105 active:scale-95 shadow-xl shadow-black/10"
+                >
+                  Launch LMA Nexus
+                </button>
+                <button className="w-full px-10 py-5 text-lg font-bold text-[#111111] transition-all border sm:w-auto border-slate-200 bg-white rounded-2xl hover:bg-slate-50">
+                  Book Architecture Review
+                </button>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-16 border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
-            {/* Brand */}
-            <div className="col-span-2 lg:col-span-1">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">L</span>
-                </div>
-                <span className="text-xl font-semibold text-slate-900 tracking-tight">
-                  LMA Nexus
-                </span>
-              </div>
-              <p className="text-sm text-slate-600">
-                Enterprise-grade syndicated loan documentation platform.
-              </p>
-            </div>
-
-            {/* Product */}
-            <div>
-              <h4 className="font-semibold text-slate-900 mb-4">Product</h4>
-              <ul className="space-y-3 text-sm text-slate-600">
-                <li><a href="#features" className="hover:text-slate-900 transition-colors">Features</a></li>
-                <li><a href="#security" className="hover:text-slate-900 transition-colors">Security</a></li>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Pricing</a></li>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Enterprise</a></li>
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div>
-              <h4 className="font-semibold text-slate-900 mb-4">Resources</h4>
-              <ul className="space-y-3 text-sm text-slate-600">
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Documentation</a></li>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">API Reference</a></li>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Blog</a></li>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Support</a></li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h4 className="font-semibold text-slate-900 mb-4">Company</h4>
-              <ul className="space-y-3 text-sm text-slate-600">
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">About</a></li>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Careers</a></li>
-                <li><a href="#contact" className="hover:text-slate-900 transition-colors">Contact</a></li>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Partners</a></li>
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h4 className="font-semibold text-slate-900 mb-4">Legal</h4>
-              <ul className="space-y-3 text-sm text-slate-600">
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Privacy Policy</a></li>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Terms of Service</a></li>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Cookie Policy</a></li>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <li><a href="#" className="hover:text-slate-900 transition-colors">GDPR</a></li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom */}
-          <div className="pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-slate-600">
-              © 2026 LMA Nexus. All rights reserved.
-            </p>
-            <div className="flex items-center space-x-6">
-              {/* Social Icons */}
-              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-              <a href="#" className="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Twitter">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
-                </svg>
-              </a>
-              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-              <a href="#" className="text-slate-400 hover:text-slate-600 transition-colors" aria-label="LinkedIn">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                </svg>
-              </a>
-              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-              <a href="#" className="text-slate-400 hover:text-slate-600 transition-colors" aria-label="GitHub">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };
