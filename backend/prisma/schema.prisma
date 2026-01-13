@@ -1,0 +1,553 @@
+// Prisma Schema for LMA Nexus
+// Database: Neon PostgreSQL (Serverless)
+// ALIGNED WITH FRONTEND TYPES (lma-nexus/src/types/)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS - Aligned with Frontend Types
+// ============================================
+
+// From user.ts: Role = 'agent' | 'legal' | 'risk' | 'investor'
+enum Role {
+  agent
+  legal
+  risk
+  investor
+}
+
+// From user.ts: WorkspaceMember.status
+enum MemberStatus {
+  active
+  pending
+  removed
+}
+
+// From document.ts: ClauseType
+enum ClauseType {
+  financial
+  covenant
+  definition
+  xref
+  general
+}
+
+// From document.ts: VariableType
+enum VariableType {
+  financial
+  definition
+  covenant
+  ratio
+}
+
+// From graph.ts: NodeType
+enum NodeType {
+  financial
+  covenant
+  definition
+  xref
+}
+
+// From drift.ts: DriftSeverity = 'HIGH' | 'MEDIUM' | 'LOW'
+enum DriftSeverity {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+// From drift.ts: DriftStatus = 'unresolved' | 'overridden' | 'reverted' | 'approved'
+enum DriftStatus {
+  unresolved
+  overridden
+  reverted
+  approved
+}
+
+// From reconciliation.ts: ConfidenceLevel = 'HIGH' | 'MEDIUM' | 'LOW'
+enum ConfidenceLevel {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+// From reconciliation.ts: ReconciliationDecision = 'pending' | 'applied' | 'rejected'
+enum ReconciliationDecision {
+  pending
+  applied
+  rejected
+}
+
+// From reconciliation.ts: ReconciliationSession.fileType
+enum ReconciliationFileType {
+  docx
+  pdf
+}
+
+// From golden-record.ts: ConnectorStatus = 'READY' | 'IN_REVIEW' | 'DISCONNECTED'
+enum ConnectorStatus {
+  READY
+  IN_REVIEW
+  DISCONNECTED
+}
+
+// From golden-record.ts: DownstreamConnector.type
+enum ConnectorType {
+  LoanIQ
+  Finastra
+  Allvue
+  CovenantTracker
+}
+
+// From golden-record.ts: GoldenRecord.status = 'READY' | 'IN_REVIEW'
+enum GoldenRecordStatus {
+  READY
+  IN_REVIEW
+}
+
+// From audit.ts: AuditEventType
+enum AuditEventType {
+  LOGIN
+  LOGOUT
+  WORKSPACE_CREATE
+  INVITE_SENT
+  ROLE_CHANGED
+  MEMBER_REMOVED
+  CLAUSE_EDIT
+  VARIABLE_EDIT
+  VARIABLE_BIND
+  GRAPH_SYNC
+  DRIFT_OVERRIDE
+  DRIFT_REVERT
+  DRIFT_APPROVE
+  RECON_APPLY
+  RECON_REJECT
+  PUBLISH
+  EXPORT_JSON
+  EXPORT_AUDIT
+  GOVERNANCE_UPDATED
+  SECTION_LOCKED
+  SECTION_UNLOCKED
+}
+
+// From audit.ts: ReasonCategory
+enum ReasonCategory {
+  borrower_request
+  market_conditions
+  credit_update
+  legal_requirement
+  other
+}
+
+// ============================================
+// MODELS - Aligned with Frontend Types
+// ============================================
+
+// From user.ts: User
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  sessions                Session[]
+  workspaceMembers        WorkspaceMember[]
+  workspacesCreated       Workspace[]             @relation("WorkspaceCreator")
+  clausesLocked           Clause[]                @relation("ClauseLockUser")
+  clausesModified         Clause[]                @relation("ClauseModifiedBy")
+  variablesModified       Variable[]              @relation("VariableModifiedBy")
+  driftItemsModified      DriftItem[]             @relation("DriftCurrentModifiedBy")
+  driftItemsApproved      DriftItem[]             @relation("DriftApprovedBy")
+  reconciliationUploads   ReconciliationSession[]
+  reconciliationDecisions ReconciliationItem[]
+  auditEvents             AuditEvent[]
+
+  @@map("users")
+}
+
+// From user.ts: Session
+model Session {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// From workspace.ts: Workspace
+model Workspace {
+  id              String   @id @default(cuid())
+  name            String
+  currency        String   @default("USD")
+  amount          Float    @default(0)
+  standard        String   @default("LMA")
+  basePdfName     String?  @map("base_pdf_name")
+  createdAt       DateTime @default(now()) @map("created_at")
+  lastSyncAt      DateTime @default(now()) @map("last_sync_at")
+  createdById     String   @map("created_by_id")
+  governanceRules Json     @default("{}") @map("governance_rules")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  createdBy              User                    @relation("WorkspaceCreator", fields: [createdById], references: [id])
+  members                WorkspaceMember[]
+  clauses                Clause[]
+  variables              Variable[]
+  graphNodes             GraphNode[]
+  graphEdges             GraphEdge[]
+  graphState             GraphState?
+  driftItems             DriftItem[]
+  reconciliationSessions ReconciliationSession[]
+  reconciliationItems    ReconciliationItem[]
+  auditEvents            AuditEvent[]
+  goldenRecords          GoldenRecord[]
+  covenants              Covenant[]
+  downstreamConnectors   DownstreamConnector[]
+
+  @@map("workspaces")
+}
+
+// From user.ts: WorkspaceMember
+model WorkspaceMember {
+  id          String       @id @default(cuid())
+  workspaceId String       @map("workspace_id")
+  userId      String       @map("user_id")
+  role        Role         @default(investor)
+  isAdmin     Boolean      @default(false) @map("is_admin")
+  status      MemberStatus @default(pending)
+  invitedAt   DateTime     @default(now()) @map("invited_at")
+  joinedAt    DateTime?    @map("joined_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([status])
+  @@map("workspace_members")
+}
+
+// From document.ts: Clause
+model Clause {
+  id             String     @id @default(cuid())
+  workspaceId    String     @map("workspace_id")
+  title          String
+  body           String
+  type           ClauseType
+  order          Int
+  isSensitive    Boolean    @default(false) @map("is_sensitive")
+  isLocked       Boolean    @default(false) @map("is_locked")
+  lockedBy       String?    @map("locked_by")
+  lockedAt       DateTime?  @map("locked_at")
+  lastModifiedAt DateTime   @default(now()) @map("last_modified_at")
+  lastModifiedBy String     @map("last_modified_by")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  workspace           Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lockedByUser        User?                @relation("ClauseLockUser", fields: [lockedBy], references: [id])
+  lastModifiedByUser  User                 @relation("ClauseModifiedBy", fields: [lastModifiedBy], references: [id])
+  variables           Variable[]
+  driftItems          DriftItem[]
+  reconciliationItems ReconciliationItem[]
+  graphNodes          GraphNode[]
+  covenants           Covenant[]
+
+  @@unique([workspaceId, order])
+  @@index([workspaceId])
+  @@index([type])
+  @@index([isLocked])
+  @@map("clauses")
+}
+
+// From document.ts: Variable
+model Variable {
+  id             String       @id @default(cuid())
+  workspaceId    String       @map("workspace_id")
+  clauseId       String       @map("clause_id")
+  label          String
+  type           VariableType
+  value          String
+  unit           String?
+  baselineValue  String?      @map("baseline_value")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  lastModifiedAt DateTime     @default(now()) @map("last_modified_at")
+  lastModifiedBy String?      @map("last_modified_by")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  workspace           Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clause              Clause               @relation(fields: [clauseId], references: [id], onDelete: Cascade)
+  lastModifiedByUser  User?                @relation("VariableModifiedBy", fields: [lastModifiedBy], references: [id])
+  driftItems          DriftItem[]
+  reconciliationItems ReconciliationItem[]
+  graphNodes          GraphNode[]
+
+  @@index([workspaceId])
+  @@index([clauseId])
+  @@index([type])
+  @@map("variables")
+}
+
+// From graph.ts: GraphNode
+model GraphNode {
+  id          String   @id @default(cuid())
+  workspaceId String   @map("workspace_id")
+  label       String
+  type        NodeType
+  clauseId    String?  @map("clause_id")
+  variableId  String?  @map("variable_id")
+  value       String?
+  hasDrift    Boolean  @default(false) @map("has_drift")
+  hasWarning  Boolean  @default(false) @map("has_warning")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clause    Clause?     @relation(fields: [clauseId], references: [id], onDelete: SetNull)
+  variable  Variable?   @relation(fields: [variableId], references: [id], onDelete: SetNull)
+  edgesFrom GraphEdge[] @relation("GraphEdgeFrom")
+  edgesTo   GraphEdge[] @relation("GraphEdgeTo")
+
+  @@index([workspaceId])
+  @@index([type])
+  @@index([clauseId])
+  @@index([variableId])
+  @@map("graph_nodes")
+}
+
+// From graph.ts: GraphEdge
+model GraphEdge {
+  id          String   @id @default(cuid())
+  workspaceId String   @map("workspace_id")
+  sourceId    String   @map("source_id")
+  targetId    String   @map("target_id")
+  weight      Int      @default(1)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  source    GraphNode @relation("GraphEdgeFrom", fields: [sourceId], references: [id], onDelete: Cascade)
+  target    GraphNode @relation("GraphEdgeTo", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, sourceId, targetId])
+  @@index([workspaceId])
+  @@index([sourceId])
+  @@index([targetId])
+  @@map("graph_edges")
+}
+
+// From graph.ts: GraphState
+model GraphState {
+  id             String   @id @default(cuid())
+  workspaceId    String   @unique @map("workspace_id")
+  integrityScore Float    @default(1) @map("integrity_score")
+  lastComputedAt DateTime @default(now()) @map("last_computed_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("graph_state")
+}
+
+// From drift.ts: DriftItem
+model DriftItem {
+  id                 String        @id @default(cuid())
+  workspaceId        String        @map("workspace_id")
+  clauseId           String        @map("clause_id")
+  variableId         String?       @map("variable_id")
+  title              String
+  type               ClauseType
+  severity           DriftSeverity
+  baselineValue      String        @map("baseline_value")
+  baselineApprovedAt DateTime      @map("baseline_approved_at")
+  currentValue       String        @map("current_value")
+  currentModifiedAt  DateTime      @map("current_modified_at")
+  currentModifiedBy  String        @map("current_modified_by")
+  status             DriftStatus   @default(unresolved)
+  approvedBy         String?       @map("approved_by")
+  approvedAt         DateTime?     @map("approved_at")
+  approvalReason     String?       @map("approval_reason")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clause                Clause    @relation(fields: [clauseId], references: [id], onDelete: Cascade)
+  variable              Variable? @relation(fields: [variableId], references: [id], onDelete: SetNull)
+  currentModifiedByUser User      @relation("DriftCurrentModifiedBy", fields: [currentModifiedBy], references: [id])
+  approvedByUser        User?     @relation("DriftApprovedBy", fields: [approvedBy], references: [id])
+
+  @@index([workspaceId])
+  @@index([clauseId])
+  @@index([variableId])
+  @@index([severity])
+  @@index([status])
+  @@map("drift_items")
+}
+
+// From reconciliation.ts: ReconciliationSession
+model ReconciliationSession {
+  id            String                 @id @default(cuid())
+  workspaceId   String                 @map("workspace_id")
+  fileName      String                 @map("file_name")
+  fileType      ReconciliationFileType @map("file_type")
+  uploadedAt    DateTime               @default(now()) @map("uploaded_at")
+  uploadedBy    String                 @map("uploaded_by")
+  totalItems    Int                    @default(0) @map("total_items")
+  appliedCount  Int                    @default(0) @map("applied_count")
+  rejectedCount Int                    @default(0) @map("rejected_count")
+  pendingCount  Int                    @default(0) @map("pending_count")
+  createdAt     DateTime               @default(now()) @map("created_at")
+  updatedAt     DateTime               @updatedAt @map("updated_at")
+
+  workspace      Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  uploadedByUser User                 @relation(fields: [uploadedBy], references: [id])
+  items          ReconciliationItem[]
+
+  @@index([workspaceId])
+  @@index([uploadedBy])
+  @@index([fileType])
+  @@map("reconciliation_sessions")
+}
+
+// From reconciliation.ts: ReconciliationItem
+model ReconciliationItem {
+  id               String                 @id @default(cuid())
+  workspaceId      String                 @map("workspace_id")
+  sessionId        String                 @map("session_id")
+  incomingSnippet  String                 @map("incoming_snippet")
+  targetClauseId   String                 @map("target_clause_id")
+  targetVariableId String?                @map("target_variable_id")
+  confidence       ConfidenceLevel
+  baselineValue    String                 @map("baseline_value")
+  currentValue     String                 @map("current_value")
+  proposedValue    String                 @map("proposed_value")
+  decision         ReconciliationDecision @default(pending)
+  decisionReason   String?                @map("decision_reason")
+  decidedBy        String?                @map("decided_by")
+  decidedAt        DateTime?              @map("decided_at")
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+
+  workspace      Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  session        ReconciliationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  targetClause   Clause                @relation(fields: [targetClauseId], references: [id], onDelete: Cascade)
+  targetVariable Variable?             @relation(fields: [targetVariableId], references: [id], onDelete: SetNull)
+  decidedByUser  User?                 @relation(fields: [decidedBy], references: [id])
+
+  @@index([workspaceId])
+  @@index([sessionId])
+  @@index([decision])
+  @@index([confidence])
+  @@index([targetClauseId])
+  @@index([targetVariableId])
+  @@map("reconciliation_items")
+}
+
+// From audit.ts: AuditEvent
+model AuditEvent {
+  id             String          @id @default(cuid())
+  workspaceId    String?         @map("workspace_id")
+  timestamp      DateTime        @default(now())
+  actorId        String          @map("actor_id")
+  actorName      String          @map("actor_name")
+  eventType      AuditEventType  @map("event_type")
+  targetType     String?         @map("target_type")
+  targetId       String?         @map("target_id")
+  beforeState    String?         @map("before_state")
+  afterState     String?         @map("after_state")
+  reason         String?
+  reasonCategory ReasonCategory? @map("reason_category")
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  actor     User       @relation(fields: [actorId], references: [id])
+
+  @@index([workspaceId])
+  @@index([actorId])
+  @@index([eventType])
+  @@index([timestamp])
+  @@map("audit_events")
+}
+
+// From golden-record.ts: GoldenRecord
+model GoldenRecord {
+  id                       String             @id @default(cuid())
+  workspaceId              String             @unique @map("workspace_id")
+  status                   GoldenRecordStatus @default(IN_REVIEW)
+  integrityScore           Float              @default(0) @map("integrity_score")
+  unresolvedHighDriftCount Int                @default(0) @map("unresolved_high_drift_count")
+  lastExportAt             DateTime?          @map("last_export_at")
+  lastPublishAt            DateTime?          @map("last_publish_at")
+  schemaJson               String             @default("{}") @map("schema_json")
+  createdAt                DateTime           @default(now()) @map("created_at")
+  updatedAt                DateTime           @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("golden_records")
+}
+
+// From golden-record.ts: DownstreamConnector
+model DownstreamConnector {
+  id          String          @id @default(cuid())
+  workspaceId String          @map("workspace_id")
+  name        String
+  type        ConnectorType
+  status      ConnectorStatus @default(DISCONNECTED)
+  lastSyncAt  DateTime?       @map("last_sync_at")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([type])
+  @@index([status])
+  @@map("downstream_connectors")
+}
+
+// From golden-record.ts: Covenant
+model Covenant {
+  id               String   @id @default(cuid())
+  workspaceId      String   @map("workspace_id")
+  name             String
+  testFrequency    String   @map("test_frequency")
+  threshold        String
+  calculationBasis String   @map("calculation_basis")
+  clauseId         String   @map("clause_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clause    Clause    @relation(fields: [clauseId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([clauseId])
+  @@map("covenants")
+}
+
+// ============================================
+// AUTH MODELS (not in FE types but needed)
+// ============================================
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String    @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
