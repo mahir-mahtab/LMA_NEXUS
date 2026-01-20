@@ -1,3 +1,19 @@
+# 🚀 Quick Start: How to Run in Development
+
+### 1. Backend Setup
+1. `cd backend`
+2. `pnpm install`
+3. `cp .env.example .env` and configure your `DATABASE_URL`
+4. `pnpm db:generate`
+5. `pnpm dev` (Runs on [http://localhost:3001](http://localhost:3001))
+
+### 2. Frontend Setup
+1. `cd frontend`
+2. `pnpm install`
+3. `pnpm start` (Runs on [http://localhost:3000](http://localhost:3000))
+
+---
+
 # LMA NEXUS
 
 **Digital Loan Documentation Platform for Syndicated Lending**
